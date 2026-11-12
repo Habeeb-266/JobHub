@@ -38,6 +38,12 @@ function JobCard({ job }) {
           <h3>{job.title}</h3>
           <p className="company-name">{job.company}</p>
         </div>
+
+        {job.match_score !== undefined && (
+          <div className="ai-match-score-badge">
+            <span className="sparkle-icon">⚡</span> {job.match_score}% Match
+          </div>
+        )}
       </div>
 
       <div className="job-info">
@@ -77,6 +83,19 @@ function JobCard({ job }) {
         <p className="recruiter-name">
           Posted by {job.recruiter}
         </p>
+      )}
+
+      {job.matched_skills && job.matched_skills.length > 0 && (
+        <div className="matched-skills-preview">
+          <span className="matched-label">Matched Skills:</span>
+          <div className="matched-tags-wrap">
+            {job.matched_skills.map((skill, idx) => (
+              <span key={idx} className="matched-tag">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
 
       <button

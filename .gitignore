@@ -12,6 +12,7 @@ env/
 db.sqlite3
 *.log
 media/
+chroma_storage/
 staticfiles/
 
 # Environment variables

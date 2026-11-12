@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "users",
+    "job_ai",
     "jobs",
     "applications",
 ]
@@ -92,10 +93,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+import sys
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'jobhub',
+        'ENGINE': 'django.db.backends.sqlite3' if 'test' in sys.argv else 'django.db.backends.postgresql',
+        'NAME': ':memory:' if 'test' in sys.argv else 'jobhub',
         'USER': 'jobhub_user',
         'PASSWORD': os.getenv("DB_PASSWORD"),
         'HOST': 'localhost',
@@ -140,6 +143,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

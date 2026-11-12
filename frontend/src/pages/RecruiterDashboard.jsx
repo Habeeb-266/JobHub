@@ -12,6 +12,29 @@ function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // AI Talent Matching state
+  const [activeAiJob, setActiveAiJob] = useState(null);
+  const [aiCandidates, setAiCandidates] = useState([]);
+  const [aiCandidateLoading, setAiCandidateLoading] = useState(false);
+  const [aiCandidateError, setAiCandidateError] = useState("");
+
+  const handleOpenAiMatches = async (job) => {
+    setActiveAiJob(job);
+    setAiCandidateLoading(true);
+    setAiCandidateError("");
+    setAiCandidates([]);
+
+    try {
+      const res = await api.get(`/ai/jobs/${job.id}/candidates/`);
+      setAiCandidates(res.data.candidate_matches || []);
+    } catch (err) {
+      console.error("Failed to load candidate matches:", err);
+      setAiCandidateError(err.response?.data?.error || "Failed to load candidate matches.");
+    } finally {
+      setAiCandidateLoading(false);
+    }
+  };
+
   const token = localStorage.getItem("access_token");
 
   const user = JSON.parse(
@@ -312,6 +335,14 @@ function RecruiterDashboard() {
                         </button>
 
                         <button
+                          className="ai-matches-button"
+                          onClick={() => handleOpenAiMatches(job)}
+                          title="Search candidates matching this job in ChromaDB"
+                        >
+                          ⚡ AI Talent
+                        </button>
+
+                        <button
                           className="delete-job-button"
                           onClick={() =>
                             handleDeleteJob(
@@ -333,6 +364,62 @@ function RecruiterDashboard() {
           </section>
 
         </div>
+
+        {/* AI Talent Match Modal */}
+        {activeAiJob && (
+          <div className="modal-overlay" onClick={() => setActiveAiJob(null)}>
+            <div className="ai-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="ai-modal-header">
+                <div>
+                  <span className="ai-modal-badge">ChromaDB Vector Retrieval</span>
+                  <h3>AI Talent Matches for: {activeAiJob.title}</h3>
+                </div>
+                <button className="modal-close-btn" onClick={() => setActiveAiJob(null)}>
+                  ✕
+                </button>
+              </div>
+
+              <div className="ai-modal-body">
+                {aiCandidateLoading && (
+                  <div className="status-message">
+                    Scanning vector space for top matching candidate profiles...
+                  </div>
+                )}
+
+                {aiCandidateError && (
+                  <div className="error-message">{aiCandidateError}</div>
+                )}
+
+                {!aiCandidateLoading && !aiCandidateError && aiCandidates.length === 0 && (
+                  <div className="empty-message">
+                    <h4>No vector matches yet</h4>
+                    <p>No candidates have uploaded resumes or matched this job profile.</p>
+                  </div>
+                )}
+
+                {!aiCandidateLoading && aiCandidates.length > 0 && (
+                  <div className="ai-candidates-list">
+                    {aiCandidates.map((c) => (
+                      <div key={c.user_id} className="candidate-match-card">
+                        <div className="candidate-match-top">
+                          <div>
+                            <h4>{c.full_name || c.username}</h4>
+                            <span className="candidate-meta">
+                              🧑‍💻 {c.experience_years} years exp • {c.skill_count} skills indexed
+                            </span>
+                          </div>
+                          <div className="candidate-score-badge">
+                            ⚡ {c.match_score}% Match
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );

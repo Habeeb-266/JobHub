@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import api from "../services/api";
 import Navbar from "../components/Navbar";
+import ResumeIntelligence from "../components/ResumeIntelligence";
 
 function Profile() {
   const [profile, setProfile] = useState(null);
@@ -226,6 +227,10 @@ function Profile() {
                 </button>
               </form>
             </div>
+          )}
+
+          {!loading && profile && profile.role === "candidate" && (
+            <ResumeIntelligence />
           )}
         </div>
       </main>
